@@ -29,14 +29,15 @@ echo "Starting dedup-mcp on port $PORT..."
 PORT="$PORT" "$NODE_BIN" "$ROOT/dist/cli.js" http > "$MCP_LOG" 2>&1 &
 MCP_PID=$!
 
-# 2) Wait for the server to be ready
+# 2) Wait for the server to be ready (use /health — /mcp now returns 400
+#    without a session header per the MCP Streamable HTTP spec).
 for i in {1..15}; do
-  if curl -sf "http://localhost:$PORT/mcp" >/dev/null 2>&1; then
+  if curl -sf "http://localhost:$PORT/health" >/dev/null 2>&1; then
     break
   fi
   sleep 0.3
 done
-if ! curl -sf "http://localhost:$PORT/mcp" >/dev/null 2>&1; then
+if ! curl -sf "http://localhost:$PORT/health" >/dev/null 2>&1; then
   echo "dedup-mcp failed to start. Tail of $MCP_LOG:"
   tail -20 "$MCP_LOG"
   exit 1

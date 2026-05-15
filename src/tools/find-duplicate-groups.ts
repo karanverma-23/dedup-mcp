@@ -28,9 +28,29 @@ export interface FindGroupsInput {
   group_threshold?: Tier;
 }
 
+/** Per-member enrichment so consumers don't have to cross-reference IDs back
+ *  to the original issue list when formatting a human-readable report. */
+export interface GroupMember {
+  internal_id: string;
+  title?: string;
+  severity_code?: string;
+  library_name?: string;
+  current_version?: string;
+  is_primary: boolean;
+}
+
 export interface DuplicateGroup {
   primary_issue_id: string;
   duplicate_issue_ids: string[];
+  /** Same data as primary + duplicates but enriched with title/severity/etc.
+   *  Use this for rendering reports — it's self-contained. */
+  members: GroupMember[];
+  /** One-line human-readable summary, e.g.
+   *  "CVE-2016-10144 across 6 ImageMagick sibling packages". */
+  headline: string;
+  /** Suggested action for downstream consumers / Slack messages.
+   *  e.g. "Apply one component-level exemption to cover all 6 packages." */
+  suggested_action: string;
   confidence_tier: Tier;
   scanners: string[];
   matched_signals: Record<string, string | string[]>;
@@ -141,9 +161,24 @@ export function findDuplicateGroups(input: FindGroupsInput): FindGroupsOutput {
       ...new Set(memberIssues.map((m) => m.product_name).filter(Boolean)),
     ] as string[];
 
+    const enrichedMembers: GroupMember[] = members.map((id) => {
+      const issue = byId.get(id);
+      return {
+        internal_id: id,
+        title: issue?.title,
+        severity_code: issue?.severity_code,
+        library_name: issue?.library_name,
+        current_version: issue?.current_version,
+        is_primary: id === primaryId,
+      };
+    });
+
     dupGroups.push({
       primary_issue_id: primaryId,
       duplicate_issue_ids: members.filter((id) => id !== primaryId),
+      members: enrichedMembers,
+      headline: buildHeadline(memberIssues, bestMatch, finalTier),
+      suggested_action: buildSuggestedAction(memberIssues, finalTier),
       confidence_tier: finalTier,
       scanners,
       matched_signals: bestMatch?.matched_signals ?? {},
@@ -205,4 +240,118 @@ export function findDuplicateGroups(input: FindGroupsInput): FindGroupsOutput {
       "DefectDojo-style hash-field tiering (https://docs.defectdojo.com/triage_findings/finding_deduplication/about_deduplication/) + Trivy/Snyk per-scanner field practice",
     warnings,
   };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Human-readable summaries
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Build a one-line "what is this group" summary for display. */
+function buildHeadline(
+  members: RefinedIssue[],
+  match: TierMatch | null,
+  tier: Tier,
+): string {
+  const cves = uniqueRefIds(members, "cve");
+  const cwes = uniqueRefIds(members, "cwe");
+  const libs = uniqueLibraries(members);
+  const versions = uniqueVersions(members);
+  const n = members.length;
+
+  // SCA case: shared CVE on packages (most common pattern)
+  if (cves.length > 0) {
+    const cveStr = cves.length === 1 ? cves[0] : `${cves[0]} (+${cves.length - 1} more)`;
+    if (libs.length > 1) {
+      const libFamily = sharedPrefix(libs) || libs[0].split(/[-/_]/)[0];
+      return `${cveStr} across ${n} sibling ${libFamily} packages`;
+    }
+    if (libs.length === 1 && versions.length > 1) {
+      return `${cveStr} on ${libs[0]} (${versions.length} versions: ${versions.join(", ")})`;
+    }
+    if (libs.length === 1) {
+      return `${cveStr} on ${libs[0]}@${versions[0] ?? "?"}`;
+    }
+    return `${cveStr} across ${n} findings`;
+  }
+
+  // SAST case: shared CWE
+  if (cwes.length > 0) {
+    const cweStr = cwes.length === 1 ? cwes[0] : `${cwes[0]} (+${cwes.length - 1} more)`;
+    return `${cweStr} across ${n} findings`;
+  }
+
+  // SAST T2b: same library/version, no CWE
+  if (libs.length === 1 && versions.length === 1) {
+    return `Same library ${libs[0]}@${versions[0]} flagged ${n}×`;
+  }
+
+  // SAST T3b: identical title (re-scan duplicates)
+  if (match?.matched_signals?.title) {
+    return `Identical-title cluster (${n} findings)`;
+  }
+
+  // Cross-type rescue
+  if (match?.matched_signals?.cross_type) {
+    return `Cross-type duplicate: ${match.matched_signals.cross_type}`;
+  }
+
+  return `Cluster of ${n} ${tier.toLowerCase()}-confidence duplicates`;
+}
+
+/** Build a one-line action recommendation. */
+function buildSuggestedAction(members: RefinedIssue[], tier: Tier): string {
+  const libs = uniqueLibraries(members);
+  const versions = uniqueVersions(members);
+  if (libs.length > 1) {
+    return `Apply one component-level exemption — single fix to the parent library will resolve all ${members.length} sibling packages.`;
+  }
+  if (libs.length === 1 && versions.length > 1) {
+    return `Same library affected at ${versions.length} versions — likely fixed by upgrading to a single safe version.`;
+  }
+  if (tier === "HIGH") {
+    return `Cross-scanner duplicate — keep the primary, exempt the others as duplicates.`;
+  }
+  return `Review and exempt the ${members.length - 1} duplicate(s) of the primary issue.`;
+}
+
+function uniqueRefIds(issues: RefinedIssue[], type: "cve" | "cwe" | "ghsa"): string[] {
+  const set = new Set<string>();
+  for (const i of issues) {
+    for (const r of i.reference_identifiers ?? []) {
+      if (r.type.toLowerCase() === type) set.add(r.id.toUpperCase());
+    }
+  }
+  return [...set];
+}
+
+function uniqueLibraries(issues: RefinedIssue[]): string[] {
+  const set = new Set<string>();
+  for (const i of issues) {
+    if (i.library_name) set.add(i.library_name);
+  }
+  return [...set];
+}
+
+function uniqueVersions(issues: RefinedIssue[]): string[] {
+  const set = new Set<string>();
+  for (const i of issues) {
+    if (i.current_version) set.add(i.current_version);
+  }
+  return [...set];
+}
+
+/** Find the longest common prefix of a list of strings, ending at a word
+ *  boundary (so we get "imagemagick" from ["imagemagick", "imagemagick-common", ...]
+ *  rather than the more precise but less readable longest substring). */
+function sharedPrefix(strs: string[]): string {
+  if (strs.length === 0) return "";
+  let prefix = strs[0];
+  for (const s of strs.slice(1)) {
+    let i = 0;
+    while (i < prefix.length && i < s.length && prefix[i] === s[i]) i++;
+    prefix = prefix.slice(0, i);
+    if (!prefix) break;
+  }
+  // Trim trailing separator garbage
+  return prefix.replace(/[-_./0-9]+$/, "");
 }

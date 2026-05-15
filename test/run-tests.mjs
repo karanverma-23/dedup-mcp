@@ -264,6 +264,19 @@ section("Real STO compact list — title enrichment populates CVE + pkg + ver");
 // ════════════════════════════════════════════════════════════════════════
 // NORMALIZER (raw STO API JSON → RefinedIssue)
 // ════════════════════════════════════════════════════════════════════════
+section("Normalizer: tolerates JSON-stringified input (LLM round-trip quirk)");
+{
+  const fx = loadFixture("normalize-sto-api");
+  // Simulate the LLM passing a stringified version (real-world quirk seen in QA)
+  const normalized = normalizeStoIssues({ issues: JSON.stringify(fx) });
+  console.log("from stringified input:", JSON.stringify(normalized.stats));
+  check(normalized.stats.output_count === 2,
+        "auto-parses JSON string and produces 2 normalized issues",
+        `got ${normalized.stats.output_count}`);
+  check(normalized.refined_issues[0]?.library_name === "lodash",
+        "field-mapping still works on stringified input");
+}
+
 section("Normalizer: raw STO API → RefinedIssue, then dedup");
 {
   const fx = loadFixture("normalize-sto-api");

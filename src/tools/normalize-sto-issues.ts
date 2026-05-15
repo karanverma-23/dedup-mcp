@@ -39,8 +39,31 @@ export interface NormalizeOutput {
   warnings: string[];
 }
 
-/** Heuristically extract the issues array from anything we get. */
+/** Heuristically extract the issues array from anything we get.
+ *  Tolerant of:
+ *    - plain arrays
+ *    - {data|issues|content|results|items: [...]}
+ *    - paginated {data: {content: [...]}}
+ *    - JSON-encoded STRINGS of any of the above (the orchestrating LLM
+ *      sometimes JSON.stringifies the harness_list response when passing
+ *      between MCP tool calls; auto-parse so the human doesn't have to
+ *      re-prompt for that).
+ */
 function asIssueArray(input: unknown): unknown[] {
+  // Auto-parse JSON-encoded strings — the LLM sometimes stringifies the
+  // harness_list response between tool calls.
+  if (typeof input === "string") {
+    const trimmed = input.trim();
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+      try {
+        input = JSON.parse(trimmed);
+      } catch {
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
   if (Array.isArray(input)) return input;
   if (input && typeof input === "object") {
     const obj = input as Record<string, unknown>;
