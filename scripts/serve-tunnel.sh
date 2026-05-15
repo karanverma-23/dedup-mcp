@@ -44,15 +44,22 @@ fi
 echo "  ✓ dedup-mcp ready  (logs: $MCP_LOG)"
 
 # 3) Start ngrok
+# --response-header-add: bypasses ngrok's free-plan browser interstitial which
+#   otherwise sends HTML to the Harness platform instead of JSON-RPC.
+#   (Pattern from Himanshu Agrawal's working config in #agent-dev-days-2026.)
 echo "Starting ngrok tunnel..."
-ngrok http --log=stdout "$PORT" > "$NGROK_LOG" 2>&1 &
+ngrok http \
+  --log=stdout \
+  --response-header-add "ngrok-skip-browser-warning: true" \
+  "$PORT" > "$NGROK_LOG" 2>&1 &
 NGROK_PID=$!
 
 # 4) Pull the public URL from ngrok's local API (port 4040)
 PUBLIC_URL=""
 for i in {1..30}; do
+  # ngrok serves either *.ngrok-free.app or *.ngrok-free.dev depending on plan/region
   PUBLIC_URL="$(curl -sf http://localhost:4040/api/tunnels 2>/dev/null \
-    | grep -oE 'https://[a-z0-9-]+\.ngrok-free\.app' \
+    | grep -oE 'https://[a-z0-9-]+\.ngrok-free\.(app|dev)' \
     | head -1 || true)"
   if [[ -n "$PUBLIC_URL" ]]; then break; fi
   sleep 0.5
