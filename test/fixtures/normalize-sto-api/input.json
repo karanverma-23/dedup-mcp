@@ -1,0 +1,44 @@
+{
+  "description": "Mimics the raw response from harness_list(security_issue, ...) — STO API camelCase shape, wrapped in {data:[...]} like a typical list endpoint. Includes 1 SCA issue from Snyk and 1 from Grype that should normalize to a duplicate-able pair.",
+  "expected": {
+    "output_count": 2,
+    "scanners": ["snyk", "grype"],
+    "after_dedup_groups": 1,
+    "after_dedup_tier": "HIGH"
+  },
+  "data": [
+    {
+      "issueId": "iss-real-001",
+      "accountId": "acc-qa",
+      "scanId": "scan-real-1",
+      "productId": "prod-snyk-uuid",
+      "productName": "snyk",
+      "issueType": "SCA",
+      "title": "Prototype Pollution in lodash",
+      "severity": 7.4,
+      "severityCode": "High",
+      "libraryName": "lodash",
+      "currentVersion": "4.17.20",
+      "referenceIdentifiers": [
+        { "type": "cve", "id": "CVE-2021-23337" },
+        { "type": "cwe", "id": "CWE-1321" }
+      ]
+    },
+    {
+      "issueId": "iss-real-002",
+      "accountId": "acc-qa",
+      "scanId": "scan-real-1",
+      "productId": "prod-grype-uuid",
+      "productName": "grype",
+      "issueType": "SCA",
+      "title": "lodash 4.17.20 vulnerable to Prototype Pollution",
+      "severity": 7.4,
+      "severityCode": "High",
+      "libraryName": "lodash",
+      "currentVersion": "v4.17.20",
+      "referenceIdentifiers": [
+        { "type": "cve", "id": "CVE-2021-23337" }
+      ]
+    }
+  ]
+}

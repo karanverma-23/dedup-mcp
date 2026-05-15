@@ -1,0 +1,69 @@
+{
+  "description": "Three SCA scanners (Snyk, Grype, Aqua Trivy) all flag the same lodash CVE. Plus one unrelated SCA finding that should NOT be grouped.",
+  "expected": {
+    "duplicate_groups": 1,
+    "primary_scanner": "snyk",
+    "primary_tier": "HIGH",
+    "members_in_group": 3,
+    "ungrouped_singletons": 1
+  },
+  "issues": [
+    {
+      "internal_id": "iss-001",
+      "scan_id": "scan-abc",
+      "product_name": "snyk",
+      "issue_type": "SCA",
+      "title": "Prototype Pollution in lodash",
+      "severity": 7.4,
+      "severity_code": "high",
+      "library_name": "lodash",
+      "current_version": "4.17.20",
+      "reference_identifiers": [
+        { "type": "cve", "id": "CVE-2021-23337" },
+        { "type": "cwe", "id": "CWE-1321" }
+      ]
+    },
+    {
+      "internal_id": "iss-002",
+      "scan_id": "scan-abc",
+      "product_name": "grype",
+      "issue_type": "SCA",
+      "title": "lodash 4.17.20 vulnerable to Prototype Pollution",
+      "severity": 7.4,
+      "severity_code": "high",
+      "library_name": "lodash",
+      "current_version": "v4.17.20",
+      "reference_identifiers": [
+        { "type": "cve", "id": "CVE-2021-23337" }
+      ]
+    },
+    {
+      "internal_id": "iss-003",
+      "scan_id": "scan-abc",
+      "product_name": "aqua_trivy",
+      "issue_type": "SCA",
+      "title": "CVE-2021-23337: Prototype Pollution in Lodash",
+      "severity": 7.4,
+      "severity_code": "high",
+      "library_name": "Lodash",
+      "current_version": "4.17.20",
+      "reference_identifiers": [
+        { "type": "cve", "id": "CVE-2021-23337" }
+      ]
+    },
+    {
+      "internal_id": "iss-099",
+      "scan_id": "scan-abc",
+      "product_name": "snyk",
+      "issue_type": "SCA",
+      "title": "ReDoS in unrelated-package",
+      "severity": 5.3,
+      "severity_code": "medium",
+      "library_name": "unrelated-package",
+      "current_version": "1.2.3",
+      "reference_identifiers": [
+        { "type": "cve", "id": "CVE-2099-99999" }
+      ]
+    }
+  ]
+}

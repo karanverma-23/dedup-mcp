@@ -1,0 +1,25 @@
+{
+  "description": "Covers the 3 improvements from the QA SAST run review: (1) Eval Injection→CWE-95, (2) Semgrep namespace mining, (3) cross-type title-equality rescue.",
+  "expected": {
+    "input_count": 11,
+    "duplicate_groups_min_at_low": 3,
+    "review_candidates_min_at_high": 1,
+    "must_infer_cwes": ["CWE-95", "CWE-614", "CWE-798"]
+  },
+  "data": [
+    { "id": "ev1", "issueType": "SECRET", "severityCode": "high", "title": "Improper neutralization of directives in dynamically evaluated code ('Eval Injection')" },
+    { "id": "ev2", "issueType": "SAST",   "severityCode": "high", "title": "Improper neutralization of directives in dynamically evaluated code ('Eval Injection')" },
+    { "id": "ev3", "issueType": "SAST",   "severityCode": "high", "title": "Eval Injection in user input handler" },
+
+    { "id": "ck1", "issueType": "SAST", "severityCode": "medium", "title": "Semgrep Finding: javascript.express.express-cookie-session-no-secure" },
+    { "id": "ck2", "issueType": "SAST", "severityCode": "medium", "title": "Semgrep Finding: javascript.express.express-cookie-session-no-httponly" },
+    { "id": "ck3", "issueType": "SAST", "severityCode": "medium", "title": "Semgrep Finding: javascript.express.express-cookie-session-no-domain" },
+
+    { "id": "se1", "issueType": "SECRET", "severityCode": "high", "title": "Semgrep Finding: secrets.detected-private-key" },
+    { "id": "se2", "issueType": "SECRET", "severityCode": "high", "title": "Semgrep Finding: secrets.detected-bcrypt-hash" },
+    { "id": "se3", "issueType": "SECRET", "severityCode": "high", "title": "Hardcoded API Key in source" },
+
+    { "id": "tn1", "issueType": "SAST", "severityCode": "low",   "title": "Tabnabbing: External Link Retains Opener Relationship" },
+    { "id": "tn2", "issueType": "SAST", "severityCode": "low",   "title": "Tabnabbing detected — opener relationship not severed" }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "description": "Mimics the real STO compact-list payload from /all-issues/issues — title carries CVE+package@version, no structured referenceIdentifiers/libraryName/currentVersion. Tests title-enrichment fallback.",
+  "expected": {
+    "title_enriched_count": 9,
+    "duplicate_groups_min_at_low_threshold": 3,
+    "review_candidates_min_at_high_threshold": 4,
+    "groups_must_include_cves": ["CVE-2016-20013", "CVE-2024-10041"]
+  },
+  "data": [
+    { "id": "iss-1",  "issueType": "SCA", "severityCode": "high",   "title": "CVE-2016-20013: libc6@2.39-0ubuntu8 (os-pkgs, ubuntu)" },
+    { "id": "iss-2",  "issueType": "SCA", "severityCode": "high",   "title": "CVE-2016-20013: libc6-dev@2.39-0ubuntu8 (os-pkgs, ubuntu)" },
+    { "id": "iss-3",  "issueType": "SCA", "severityCode": "high",   "title": "CVE-2016-20013: libc-bin@2.39-0ubuntu8 (os-pkgs, ubuntu)" },
+
+    { "id": "iss-4",  "issueType": "SCA", "severityCode": "medium", "title": "CVE-2024-10041: libpam0g@1.5.3-5ubuntu5.1 (os-pkgs, ubuntu)" },
+    { "id": "iss-5",  "issueType": "SCA", "severityCode": "medium", "title": "CVE-2024-10041: libpam-modules@1.5.3-5ubuntu5.1 (os-pkgs, ubuntu)" },
+    { "id": "iss-6",  "issueType": "SCA", "severityCode": "medium", "title": "CVE-2024-10041: libpam-runtime@1.5.3-5ubuntu5.1 (os-pkgs, ubuntu)" },
+
+    { "id": "iss-7",  "issueType": "SCA", "severityCode": "high",   "title": "CVE-2025-27144: github.com/go-jose/go-jose/v3@3.0.3 (gomod)" },
+    { "id": "iss-8",  "issueType": "SCA", "severityCode": "high",   "title": "CVE-2025-27144: github.com/go-jose/go-jose/v4@4.0.1 (gomod)" },
+
+    { "id": "iss-9",  "issueType": "SCA", "severityCode": "low",    "title": "CVE-2099-99999: lonely-package@1.0.0 (os-pkgs)" },
+    { "id": "iss-10", "issueType": "SCA", "severityCode": "info",   "title": "Unrelated finding with no CVE in title" }
+  ]
+}

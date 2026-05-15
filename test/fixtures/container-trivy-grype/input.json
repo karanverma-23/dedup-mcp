@@ -1,0 +1,56 @@
+{
+  "description": "Aqua Trivy and Grype both flag CVE-2022-0778 on openssl in the same image layer. Plus a same-CVE finding in a different layer that should be MEDIUM.",
+  "expected": {
+    "duplicate_groups": 1,
+    "primary_tier": "HIGH",
+    "members_in_group": 2,
+    "review_candidates_min": 1
+  },
+  "issues": [
+    {
+      "internal_id": "ctr-201",
+      "scan_id": "scan-img",
+      "product_name": "aqua_trivy",
+      "issue_type": "CONTAINER",
+      "title": "openssl: Infinite loop in BN_mod_sqrt() reachable",
+      "severity": 7.5,
+      "severity_code": "high",
+      "library_name": "openssl",
+      "current_version": "1.1.1k",
+      "image_layer_id": "sha256:layer-aaa",
+      "reference_identifiers": [
+        { "type": "cve", "id": "CVE-2022-0778" }
+      ]
+    },
+    {
+      "internal_id": "ctr-202",
+      "scan_id": "scan-img",
+      "product_name": "grype",
+      "issue_type": "CONTAINER",
+      "title": "openssl 1.1.1k - CVE-2022-0778",
+      "severity": 7.5,
+      "severity_code": "high",
+      "library_name": "openssl",
+      "current_version": "1.1.1k",
+      "image_layer_id": "sha256:layer-aaa",
+      "reference_identifiers": [
+        { "type": "cve", "id": "CVE-2022-0778" }
+      ]
+    },
+    {
+      "internal_id": "ctr-203",
+      "scan_id": "scan-img",
+      "product_name": "grype",
+      "issue_type": "CONTAINER",
+      "title": "openssl 1.1.1k - CVE-2022-0778 (different layer)",
+      "severity": 7.5,
+      "severity_code": "high",
+      "library_name": "openssl",
+      "current_version": "1.1.1k",
+      "image_layer_id": "sha256:layer-bbb",
+      "reference_identifiers": [
+        { "type": "cve", "id": "CVE-2022-0778" }
+      ]
+    }
+  ]
+}

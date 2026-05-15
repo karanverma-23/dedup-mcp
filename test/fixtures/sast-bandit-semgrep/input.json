@@ -1,0 +1,57 @@
+{
+  "description": "Bandit and Semgrep both flag the same SQL injection at auth.py with slightly different reported lines. Different file = different issue.",
+  "expected": {
+    "duplicate_groups": 1,
+    "primary_tier": "HIGH",
+    "members_in_group": 2,
+    "ungrouped_singletons": 1
+  },
+  "issues": [
+    {
+      "internal_id": "sast-101",
+      "scan_id": "scan-xyz",
+      "product_name": "bandit",
+      "issue_type": "SAST",
+      "title": "B608: hardcoded_sql_expressions",
+      "severity": 6.5,
+      "severity_code": "high",
+      "file_name": "src/auth.py",
+      "line_number": 147,
+      "start_line": 147,
+      "end_line": 149,
+      "reference_identifiers": [
+        { "type": "cwe", "id": "CWE-89" }
+      ]
+    },
+    {
+      "internal_id": "sast-102",
+      "scan_id": "scan-xyz",
+      "product_name": "semgrep",
+      "issue_type": "SAST",
+      "title": "python.lang.security.audit.formatted-sql-query.formatted-sql-query",
+      "severity": 7.0,
+      "severity_code": "high",
+      "file_name": "src/auth.py",
+      "line_number": 148,
+      "start_line": 148,
+      "end_line": 150,
+      "reference_identifiers": [
+        { "type": "cwe", "id": "CWE-89" }
+      ]
+    },
+    {
+      "internal_id": "sast-103",
+      "scan_id": "scan-xyz",
+      "product_name": "semgrep",
+      "issue_type": "SAST",
+      "title": "Different SQL injection in different file",
+      "severity": 6.0,
+      "severity_code": "medium",
+      "file_name": "src/admin.py",
+      "line_number": 47,
+      "reference_identifiers": [
+        { "type": "cwe", "id": "CWE-89" }
+      ]
+    }
+  ]
+}

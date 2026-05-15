@@ -1,0 +1,39 @@
+{
+  "description": "Three completely unrelated SCA findings. Tool must NOT false-positive any duplicates.",
+  "expected": {
+    "duplicate_groups": 0,
+    "review_candidates": 0
+  },
+  "issues": [
+    {
+      "internal_id": "nodup-1",
+      "product_name": "snyk",
+      "issue_type": "SCA",
+      "title": "Different CVE on different package",
+      "severity": 7.0,
+      "library_name": "lodash",
+      "current_version": "4.17.20",
+      "reference_identifiers": [{ "type": "cve", "id": "CVE-2021-23337" }]
+    },
+    {
+      "internal_id": "nodup-2",
+      "product_name": "snyk",
+      "issue_type": "SCA",
+      "title": "Unrelated jackson vuln",
+      "severity": 9.0,
+      "library_name": "jackson-databind",
+      "current_version": "2.9.0",
+      "reference_identifiers": [{ "type": "cve", "id": "CVE-2017-7525" }]
+    },
+    {
+      "internal_id": "nodup-3",
+      "product_name": "grype",
+      "issue_type": "SCA",
+      "title": "Yet another unrelated vuln",
+      "severity": 5.0,
+      "library_name": "minimist",
+      "current_version": "1.2.0",
+      "reference_identifiers": [{ "type": "cve", "id": "CVE-2020-7598" }]
+    }
+  ]
+}
